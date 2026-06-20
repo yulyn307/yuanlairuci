@@ -3088,6 +3088,40 @@ body {
     line-height: 1.5;
 }
 
+/* 离线模式分隔线 */
+.login-offline-divider {
+    display: flex;
+    align-items: center;
+    margin: 12px 0;
+    color: var(--text-muted);
+    font-size: 12px;
+    opacity: 0.5;
+}
+
+.login-offline-divider::before,
+.login-offline-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--bg-light);
+}
+
+.login-offline-divider span {
+    padding: 0 12px;
+}
+
+/* 离线模式徽章 */
+.login-offline-badge {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 2px 8px;
+    border-radius: 8px;
+    background: rgba(245, 158, 11, 0.2);
+    color: #f59e0b;
+    font-size: 11px;
+    font-weight: 600;
+}
+
 /* ==================== 放射型关联树（续） ==================== */
 .radial {
     position: relative;

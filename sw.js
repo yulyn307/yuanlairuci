@@ -1,4 +1,4 @@
-const CACHE_NAME = 'yuanlairuci-v2';
+const CACHE_NAME = 'yuanlairuci-v3';
 
 const ASSETS = [
     './',

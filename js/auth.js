@@ -24,7 +24,7 @@ try {
         _injectedServerUrl = 'https://cupping-taco-copartner.ngrok-free.dev';
         localStorage.setItem(AUTH_SERVER_KEY, _injectedServerUrl);
     }
-} catch(e) {}
+} catch (e) { }
 
 function getServerUrl() {
     var saved = localStorage.getItem(AUTH_SERVER_KEY);
@@ -194,10 +194,10 @@ function renderLoginPage() {
         var syncRow = offline
             ? '<div class="login-offline-hint" style="margin-top:8px">💡 离线模式下所有数据存放在手机本地，学习、查词、AI释义全部可用。可随时切换到在线模式进行云端同步。</div>'
             : ('<div class="login-btn-row">' +
-            '<button class="login-btn login-btn-outline" onclick="handleLogout()">退出登录</button>' +
-            '<button class="login-btn login-btn-sync" onclick="handleManualSync()">☁️ 手动同步</button>' +
-            '</div>' +
-            '<div class="login-server-info">☁️ 服务器：<span class="lsv-url">' + svr + '</span> <a href="javascript:void(0)" onclick="handleChangeServer()" style="font-size:11px;color:var(--primary);margin-left:4px">更改</a></div>');
+                '<button class="login-btn login-btn-outline" onclick="handleLogout()">退出登录</button>' +
+                '<button class="login-btn login-btn-sync" onclick="handleManualSync()">☁️ 手动同步</button>' +
+                '</div>' +
+                '<div class="login-server-info">☁️ 服务器：<span class="lsv-url">' + svr + '</span> <a href="javascript:void(0)" onclick="handleChangeServer()" style="font-size:11px;color:var(--primary);margin-left:4px">更改</a></div>');
         ct.innerHTML =
             '<div class="login-form-wrap">' +
             '<div class="login-logged-row">' +
