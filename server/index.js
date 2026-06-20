@@ -10,6 +10,11 @@ const fs = require('fs');
 const path = require('path');
 
 const app = express();
+
+// ==================== 导出为 Vercel/Netlify Serverless 函数 ====================
+// Vercel 使用 /api 路由作为 serverless 入口
+module.exports = app;
+
 app.use(express.json());
 
 // CORS（允许前端跨域访问）

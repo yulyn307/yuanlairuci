@@ -36,7 +36,7 @@ function init() {
     if (window.location.hash === '#search') {
         switchTab('essence');
         var input = document.getElementById('search-input');
-        if (input) setTimeout(function() { input.focus(); }, 400);
+        if (input) setTimeout(function () { input.focus(); }, 400);
     } else {
         switchTab('learn');
     }

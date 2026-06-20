@@ -6,13 +6,19 @@
     "start_url": "./index.html",
     "scope": "./",
     "display": "standalone",
-    "display_override": ["standalone", "minimal-ui"],
+    "display_override": [
+        "standalone",
+        "minimal-ui"
+    ],
     "orientation": "portrait-primary",
     "background_color": "#0f172a",
     "theme_color": "#6366f1",
     "lang": "zh-CN",
     "dir": "ltr",
-    "categories": ["education", "productivity"],
+    "categories": [
+        "education",
+        "productivity"
+    ],
     "launch_handler": {
         "client_mode": "navigate-existing"
     },
@@ -58,14 +64,24 @@
             "short_name": "学习",
             "description": "打开学习卡片",
             "url": "./index.html",
-            "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+            "icons": [
+                {
+                    "src": "icons/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
         },
         {
             "name": "搜索单词",
             "short_name": "搜索",
             "description": "快速搜索单词释义",
             "url": "./index.html#search",
-            "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+            "icons": [
+                {
+                    "src": "icons/icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }
