@@ -377,54 +377,78 @@
     <script>
         (function () {
             var deferredPrompt;
-            var installBtn = document.getElementById('pwa-install-btn');
             var banner = document.getElementById('pwa-install-banner');
+            var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            var isStandalone = window.matchMedia('(display-mode: standalone)').matches;
 
-            // 监听 beforeinstallprompt
+            // 已安装好的直接退出
+            if (isStandalone) return;
+
+            // 监听 beforeinstallprompt (Android Chrome)
             window.addEventListener('beforeinstallprompt', function (e) {
                 e.preventDefault();
                 deferredPrompt = e;
-                // 已经安装过就不再显示
-                if (window.matchMedia('(display-mode: standalone)').matches) return;
-                var dismissed = sessionStorage.getItem('pwa_install_dismissed');
-                if (!dismissed) banner.style.display = 'block';
+                showBannerIfNeeded();
             });
 
             // 已安装后隐藏
             window.addEventListener('appinstalled', function () {
                 banner.style.display = 'none';
                 deferredPrompt = null;
-                console.log('PWA 已安装');
             });
+
+            function showBannerIfNeeded() {
+                var dismissedAt = localStorage.getItem('pwa_banner_dismissed_at');
+                // 24 小时后重新显示
+                if (dismissedAt && Date.now() - parseInt(dismissedAt) < 86400000) return;
+                banner.style.display = 'block';
+                // iOS 上改按钮文字
+                if (isIOS && !deferredPrompt) {
+                    document.getElementById('pwa-install-btn').textContent = '如何安装';
+                }
+            }
+
+            // 页面加载后延迟显示（给 beforeinstallprompt 一点时间）
+            setTimeout(function () {
+                if (!deferredPrompt && !isIOS) return; // Android 等 Chrome 触发后再显示
+                showBannerIfNeeded();
+            }, 2000);
 
             // 安装点击
             window.installPWA = function () {
-                if (!deferredPrompt) {
-                    // iOS / 不支持 beforeinstallprompt 的浏览器：显示引导
-                    alert('请使用浏览器菜单中的「添加到主屏幕」功能安装\n\n' +
-                        'Safari: 点击底部分享按钮 → 添加到主屏幕\n' +
-                        'Chrome: 点击右上角 ⋮ → 添加到主屏幕');
-                    return;
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(function (result) {
+                        if (result.outcome === 'accepted') {
+                            console.log('用户接受安装');
+                        }
+                        deferredPrompt = null;
+                        banner.style.display = 'none';
+                    });
+                } else if (isIOS) {
+                    alert('🍎 iPhone/iPad 安装步骤：\n\n' +
+                        '1. 点击底部中间「⬆️ 分享」按钮\n' +
+                        '2. 在菜单中向左滑动\n' +
+                        '3. 点击「添加到主屏幕」\n' +
+                        '4. 点右上角「添加」即可');
+                } else {
+                    alert('🤖 Android 安装步骤：\n\n' +
+                        '1. 点击右上角「⋮」菜单\n' +
+                        '2. 选择「添加到主屏幕」\n' +
+                        '3. 点击「安装」即可\n\n' +
+                        '如果找不到此选项，请尝试用 Chrome 浏览器打开。');
                 }
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then(function (result) {
-                    if (result.outcome === 'accepted') {
-                        console.log('用户接受安装');
-                    }
-                    deferredPrompt = null;
-                    banner.style.display = 'none';
-                });
             };
 
             window.dismissPWAInstall = function () {
                 banner.style.display = 'none';
-                sessionStorage.setItem('pwa_install_dismissed', '1');
+                localStorage.setItem('pwa_banner_dismissed_at', Date.now().toString());
             };
 
             // 注册 Service Worker
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function () {
-                    navigator.serviceWorker.register('./sw.js?_=3').then(function (reg) {
+                    navigator.serviceWorker.register('./sw.js?_=4').then(function (reg) {
                         console.log('[SW] 注册成功:', reg.scope);
                     }).catch(function (err) {
                         console.log('[SW] 注册失败:', err);
