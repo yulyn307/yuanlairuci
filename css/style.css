@@ -173,6 +173,18 @@ body {
     justify-content: center;
 }
 
+/* 安装横幅中的教程链接 */
+.pwa-install-link {
+    font-size: 11px;
+    color: rgba(255,255,255,0.7);
+    background: none;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    padding: 4px 6px;
+    text-decoration: underline;
+}
+
 /* ==================== PWA 安装引导页（全屏弹窗）==================== */
 #pwa-install-guide {
     position: fixed;
