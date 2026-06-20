@@ -907,11 +907,11 @@ async function renderDetailPage() {
         cnTransBtnHTML() +
         '</div>' +
         localHtml +
-        formsHtml +
         essenceLink +
         localPhrasesBlock +
         '</div>' +
         '<div class="dt-scroll-body">' +
+        formsHtml +
         onlineHtml +
         phrasesBlock +
         (!onlineHtml && !phrasesBlock ? '<div class="dt-empty">😕 在线词典暂无该词数据</div>' : '') +
@@ -1390,7 +1390,7 @@ async function _doEssenceSearch() {
     card.innerHTML =
         '<div class="search-card">' +
         '<div class="sr-sticky-header">' +
-        '<div class="search-word-row"><span class="search-word">' + word + '</span>' + phoneticHtml + cnTransBtnHTML() + '</div>' +
+        '<div class="search-word-row"><span class="search-word">' + word + '</span><span class="sr-phon-inline">' + phoneticHtml + '</span>' + cnTransBtnHTML() + '</div>' +
         localHtml + essenceLink + aiGenBtn +
         '</div>' +
         '<div class="sr-scroll-body">' +

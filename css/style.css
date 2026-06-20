@@ -689,13 +689,31 @@ body {
     font-size: 32px;
     font-weight: 700;
     color: var(--accent);
+    line-height: 1.2;
 }
 
 .phonetic-row {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 4px;
     flex-wrap: wrap;
+    vertical-align: middle;
+}
+
+/* Ê∫ê‰πâÈ°µÈü≥Ê†áÂÜÖËÅîÂåÖË£π */
+.sr-phon-inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    vertical-align: middle;
+}
+.sr-phon-inline .phonetic-row {
+    margin: 0;
+}
+.sr-phon-inline .pron-btn {
+    font-size: 14px;
+    padding: 4px 8px;
 }
 
 .phonetic-label {
@@ -3627,4 +3645,29 @@ body.pwa-standalone {
     .online-meaning li {
         font-size: 12px;
     }
+}
+/* ==================== “∆∂Ø∂À—πÀı£∫œÍ«È“≥ & ‘¥“Â“≥ ==================== */
+@media (max-width: 480px) {
+    .dt-word { font-size: 24px; }
+    .dt-head { gap: 5px 8px; padding-bottom: 6px; }
+    .dt-phonetics { font-size: 12px; }
+    .dt-pron-btn { padding: 4px 8px; font-size: 13px; }
+    .dt-sticky-header { padding: 10px 10px 6px; }
+    .dt-scroll-body { padding: 8px 10px 12px; }
+    .dt-forms { margin: 6px 0 12px; gap: 4px; }
+    .dt-form-tag { padding: 2px 8px; font-size: 11px; }
+    /* ‘¥“Â“≥ */
+    .search-word { font-size: 24px; }
+    .search-word-row { gap: 6px; margin-bottom: 6px; }
+    .sr-phon-inline .phonetic-text { font-size: 12px; }
+    .sr-phon-inline .phonetic-label { font-size: 10px; margin-left: 2px; }
+    .sr-phon-inline .pron-btn { font-size: 12px; padding: 3px 6px; }
+    .search-def { font-size: 14px; }
+    .sr-sticky-header { padding: 10px 12px 6px; }
+    .sr-scroll-body { padding: 6px 12px 12px; }
+}
+@media (max-width: 360px) {
+    .dt-word { font-size: 20px; }
+    .search-word { font-size: 20px; }
+    .sr-phon-inline .phonetic-text { font-size: 11px; }
 }
