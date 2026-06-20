@@ -173,6 +173,69 @@ body {
     justify-content: center;
 }
 
+/* ==================== PWA ÂÆâË£ÖÂºïÂØºÈ°µÔºàÂÖ®Â±èÂºπÁ™óÔºâ==================== */
+#pwa-install-guide {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+.pwa-guide-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+}
+.pwa-guide-card {
+    position: relative;
+    background: var(--bg-card);
+    border-radius: 20px;
+    padding: 32px 24px 24px;
+    max-width: 340px;
+    width: 90%;
+    text-align: center;
+    z-index: 1;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+}
+.pwa-guide-close {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-light);
+    color: var(--text-muted);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.pwa-guide-icon { font-size: 48px; margin-bottom: 12px; }
+.pwa-guide-title { font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.pwa-guide-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+.pwa-guide-step {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06);
+    font-size: 14px; color: var(--text-muted); text-align: left;
+}
+.pwa-step-num {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--primary); color: #fff;
+    font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+}
+.pwa-install-native-btn {
+    display: block; width: 100%;
+    margin-top: 16px; padding: 14px;
+    border: none; border-radius: 12px;
+    background: var(--primary); color: #fff;
+    font-size: 15px; font-weight: 700; cursor: pointer;
+}
+
 @keyframes slideUp {
     from {
         opacity: 0;
@@ -708,9 +771,11 @@ body {
     flex-wrap: wrap;
     vertical-align: middle;
 }
+
 .sr-phon-inline .phonetic-row {
     margin: 0;
 }
+
 .sr-phon-inline .pron-btn {
     font-size: 14px;
     padding: 4px 8px;
@@ -3646,28 +3711,92 @@ body.pwa-standalone {
         font-size: 12px;
     }
 }
-/* ==================== “∆∂Ø∂À—πÀı£∫œÍ«È“≥ & ‘¥“Â“≥ ==================== */
+
+/* ==================== ÔøΩ∆∂ÔøΩÔøΩÔøΩ—πÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ“≥ & ‘¥ÔøΩÔøΩ“≥ ==================== */
 @media (max-width: 480px) {
-    .dt-word { font-size: 24px; }
-    .dt-head { gap: 5px 8px; padding-bottom: 6px; }
-    .dt-phonetics { font-size: 12px; }
-    .dt-pron-btn { padding: 4px 8px; font-size: 13px; }
-    .dt-sticky-header { padding: 10px 10px 6px; }
-    .dt-scroll-body { padding: 8px 10px 12px; }
-    .dt-forms { margin: 6px 0 12px; gap: 4px; }
-    .dt-form-tag { padding: 2px 8px; font-size: 11px; }
-    /* ‘¥“Â“≥ */
-    .search-word { font-size: 24px; }
-    .search-word-row { gap: 6px; margin-bottom: 6px; }
-    .sr-phon-inline .phonetic-text { font-size: 12px; }
-    .sr-phon-inline .phonetic-label { font-size: 10px; margin-left: 2px; }
-    .sr-phon-inline .pron-btn { font-size: 12px; padding: 3px 6px; }
-    .search-def { font-size: 14px; }
-    .sr-sticky-header { padding: 10px 12px 6px; }
-    .sr-scroll-body { padding: 6px 12px 12px; }
+    .dt-word {
+        font-size: 24px;
+    }
+
+    .dt-head {
+        gap: 5px 8px;
+        padding-bottom: 6px;
+    }
+
+    .dt-phonetics {
+        font-size: 12px;
+    }
+
+    .dt-pron-btn {
+        padding: 4px 8px;
+        font-size: 13px;
+    }
+
+    .dt-sticky-header {
+        padding: 10px 10px 6px;
+    }
+
+    .dt-scroll-body {
+        padding: 8px 10px 12px;
+    }
+
+    .dt-forms {
+        margin: 6px 0 12px;
+        gap: 4px;
+    }
+
+    .dt-form-tag {
+        padding: 2px 8px;
+        font-size: 11px;
+    }
+
+    /* ‘¥ÔøΩÔøΩ“≥ */
+    .search-word {
+        font-size: 24px;
+    }
+
+    .search-word-row {
+        gap: 6px;
+        margin-bottom: 6px;
+    }
+
+    .sr-phon-inline .phonetic-text {
+        font-size: 12px;
+    }
+
+    .sr-phon-inline .phonetic-label {
+        font-size: 10px;
+        margin-left: 2px;
+    }
+
+    .sr-phon-inline .pron-btn {
+        font-size: 12px;
+        padding: 3px 6px;
+    }
+
+    .search-def {
+        font-size: 14px;
+    }
+
+    .sr-sticky-header {
+        padding: 10px 12px 6px;
+    }
+
+    .sr-scroll-body {
+        padding: 6px 12px 12px;
+    }
 }
+
 @media (max-width: 360px) {
-    .dt-word { font-size: 20px; }
-    .search-word { font-size: 20px; }
-    .sr-phon-inline .phonetic-text { font-size: 11px; }
+    .dt-word {
+        font-size: 20px;
+    }
+
+    .search-word {
+        font-size: 20px;
+    }
+
+    .sr-phon-inline .phonetic-text {
+        font-size: 11px;
+    }
 }
