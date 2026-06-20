@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
+    <title>源来如此 - 英语单词学习</title>
+    <meta name="description" content="词源解析 + 间隔记忆 + AI 释义，一站式的英语单词学习 PWA，支持离线使用">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="源来如此">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="源来如此">
+    <meta name="msapplication-TileColor" content="#6366f1">
+    <meta name="msapplication-TileImage" content="./icons/icon-512.png">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="./icons/icon-512.png">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <link rel="apple-touch-icon" sizes="512x512" href="./icons/icon-512.png">
+    <link rel="stylesheet" href="./css/style.css?v=13">
+</head>
+
+<body>
+
+    <!-- ========== 顶部标题 ========== -->
+    <header class="app-header">
+        <h1>源来如此</h1>
+        <p class="subtitle">叽里咕噜说啥呢，这不是都一个意思吗？</p>
+    </header>
+
+    <!-- ========== 搜索栏 ========== -->
+    <div class="search-bar-wrap">
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" class="search-input" placeholder="输入单词，探索源义…" autocomplete="off"
+                onkeydown="if(event.key==='Enter')performSearch()">
+            <button class="search-btn" onclick="performSearch()">搜索</button>
+        </div>
+        <div class="search-result" id="search-result" style="display:none"></div>
+    </div>
+
+    <!-- ========== Tab 导航 ========== -->
+    <nav class="tab-bar tab-bar-4">
+        <button class="tab-btn active" data-tab="learn" onclick="switchTab('learn')">📝 学习</button>
+        <button class="tab-btn" data-tab="detail" onclick="switchTab('detail')">📖 详细</button>
+        <button class="tab-btn" data-tab="essence" onclick="switchTab('essence')">💡 源义</button>
+        <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">⚙️ 设置</button>
+    </nav>
+
+    <!-- ========== 学习页（三合一：卡片记忆 + 穿插测试 + 纠错对比） ========== -->
+    <div class="page active" id="page-learn">
+        <!-- 左侧滑动面板：每日单词进度 -->
+        <div class="daily-panel" id="daily-panel">
+            <div class="dp-header">
+                <div class="dp-tabs">
+                    <span class="dp-tab active" id="dp-tab-today" onclick="switchDailyTab('today')">📋 今日</span>
+                    <span class="dp-tab" id="dp-tab-mastered" onclick="switchDailyTab('mastered')">✅ 已掌握</span>
+                </div>
+                <button class="dp-close" onclick="closeDailyPanel()">✕</button>
+            </div>
+            <div class="dp-list" id="dp-list"></div>
+            <div class="dp-list" id="dp-mastered-list" style="display:none"></div>
+        </div>
+        <div class="daily-panel-overlay" id="daily-panel-overlay" onclick="closeDailyPanel()"></div>
+        <!-- 右侧滑动指示条 -->
+        <div class="swipe-hint" id="swipe-hint" onclick="openDailyPanel()">◀ 查看进度</div>
+
+        <!-- 顶部进度条 -->
+        <div class="learn-top-bar">
+            <div class="learn-stats-row">
+                <span id="learn-stats-text">📚 今日 0/25</span>
+                <span class="learn-mode-badge" id="learn-mode-badge">📖 记忆</span>
+            </div>
+            <div class="learn-progress-bar">
+                <div class="learn-progress-fill" id="learn-progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- 学习主区域 -->
+        <div class="learn-main" id="learn-main">
+            <!-- 阶段一：翻转卡片 -->
+            <div id="learn-flashcard-view">
+                <div class="card-scene">
+                    <div class="flashcard" id="flashcard" onclick="flipCard()">
+                        <div class="card-face card-front">
+                            <span class="card-level" id="card-level">Lv.1</span>
+                            <span class="card-en" id="card-en">abandon</span>
+                            <div class="card-pron" id="card-pron">
+                                <button class="pron-btn" id="pron-uk"
+                                    onclick="event.stopPropagation();playCardPron('uk')" title="英式发音">🇬🇧</button>
+                                <button class="pron-btn" id="pron-us"
+                                    onclick="event.stopPropagation();playCardPron('us')" title="美式发音">🇺🇸</button>
+                            </div>
+                            <span class="card-hint">👆 点击翻转查看释义</span>
+                        </div>
+                        <div class="card-face card-back">
+                            <span class="card-zh" id="card-zh">放弃；抛弃</span>
+                            <span class="card-explain" id="card-explain">to give up completely</span>
+                            <span class="card-hint">👆 点击翻回</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="learn-card-actions" id="learn-card-actions" style="display:none">
+                    <button class="lca-btn lca-forgot" onclick="handleCardForgot()">😕 没记住</button>
+                    <button class="lca-btn lca-remember" onclick="handleCardRemember()">✅ 记住了</button>
+                </div>
+            </div>
+
+            <!-- 阶段二：ABCD 测试题 -->
+            <div id="learn-quiz-view" style="display:none">
+                <div class="learn-quiz-prompt" id="learn-quiz-prompt"></div>
+                <div class="learn-quiz-options" id="learn-quiz-options"></div>
+                <div class="learn-quiz-feedback" id="learn-quiz-feedback"></div>
+                <button class="learn-quiz-next" id="learn-quiz-next" style="display:none" onclick="handleQuizNext()">继续
+                    ▶</button>
+            </div>
+
+            <!-- 阶段三：纠错对比（答错时显示） -->
+            <div id="learn-compare-view" style="display:none">
+                <div class="compare-header">🔍 两词辨析</div>
+                <div class="compare-cards">
+                    <div class="compare-card compare-correct">
+                        <div class="compare-label">✅ 正确答案</div>
+                        <div class="compare-word" id="compare-correct-en"></div>
+                        <div class="compare-zh" id="compare-correct-zh"></div>
+                        <div class="compare-explain" id="compare-correct-explain"></div>
+                    </div>
+                    <div class="compare-card compare-wrong">
+                        <div class="compare-label">❌ 你的选择</div>
+                        <div class="compare-word" id="compare-wrong-en"></div>
+                        <div class="compare-zh" id="compare-wrong-zh"></div>
+                        <div class="compare-explain" id="compare-wrong-explain"></div>
+                    </div>
+                </div>
+                <div class="compare-diff" id="compare-diff"></div>
+                <button class="compare-back-btn" onclick="handleCompareBack()">↩ 返回继续学习</button>
+            </div>
+
+            <!-- 关联树视图 -->
+            <div id="learn-tree-view" style="display:none">
+                <div class="tree-loading" id="tree-loading">🌳 正在加载关联词…</div>
+                <div class="tree-content" id="tree-content"></div>
+                <button class="compare-back-btn" style="margin-top:12px" onclick="hideTreeView()">↩ 返回卡片</button>
+            </div>
+        </div>
+
+        <!-- 底部信息 -->
+        <div class="learn-footer" id="learn-footer">
+            <span id="learn-review-badge"></span>
+            <button class="master-btn" id="master-btn" onclick="handleMasterCurrent()">✅ 已掌握（永久跳过）</button>
+            <button class="tree-toggle-btn" id="tree-toggle-btn" onclick="toggleTreeView()" title="查看单词关联树">🌳
+                关联树</button>
+        </div>
+    </div>
+
+    <!-- ========== 详细页（当前学习词的完整释义） ========== -->
+    <div class="page" id="page-detail">
+        <div class="detail-container" id="detail-container"></div>
+    </div>
+
+    <!-- ========== 源义释义页 ========== -->
+    <div class="page" id="page-essence">
+        <div id="essence-list-view">
+            <!-- 主内容区：轮播/搜索结果/词库展开（三选一） -->
+            <div id="essence-main-area">
+                <div id="essence-empty-state">
+                    <div class="essence-cycle-hint" id="essence-cycle-hint"></div>
+                </div>
+                <div id="essence-result-card" style="display:none"></div>
+                <div id="essence-expanded-list" style="display:none">
+                    <div class="essence-expanded-header" onclick="toggleEssenceLibrary()">
+                        <span id="essence-expanded-title">📚 精选词库</span>
+                        <span class="essence-expanded-close">✕ 收起</span>
+                    </div>
+                    <p class="essence-intro">以下单词有多重含义，我们提炼了它们共同的<span class="hl">源义</span>。点击单词查看源义。</p>
+                    <div class="essence-word-list" id="essence-word-list"></div>
+                </div>
+                <div id="ai-essence-expanded-list" style="display:none">
+                    <div class="essence-expanded-header" onclick="toggleAIEssence()">
+                        <span>🤖 AI 智能生成</span>
+                        <span class="essence-expanded-close">✕ 收起</span>
+                    </div>
+                    <div class="essence-word-list" id="ai-essence-word-list"></div>
+                </div>
+            </div>
+
+            <!-- 底部切换按钮（展开时隐藏） -->
+            <div class="essence-bottom-bars" id="essence-bottom-bars">
+                <div class="essence-card" id="essence-library-card">
+                    <div class="essence-toggle" onclick="toggleEssenceLibrary()">
+                        <span class="essence-toggle-icon">📚</span>
+                        <span class="essence-toggle-label">精选词库</span>
+                        <span class="essence-toggle-count" id="essence-toggle-count">26 词</span>
+                        <span class="essence-toggle-arrow">▲</span>
+                    </div>
+                </div>
+                <div class="essence-card" id="ai-essence-section" style="display:none">
+                    <div class="essence-toggle" onclick="toggleAIEssence()">
+                        <span class="essence-toggle-icon">🤖</span>
+                        <span class="essence-toggle-label">AI 智能生成</span>
+                        <span class="essence-toggle-count" id="ai-essence-count">0 词</span>
+                        <span class="essence-toggle-arrow">▲</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="essence-empty-ai" class="essence-empty-hint" style="display:none">
+                <p>🔍 搜索任意单词，AI 将为其生成<span class="hl">源义释义</span></p>
+                <p class="essence-empty-sub">需要先在「⚙️ 设置」中配置 AI 接口</p>
+            </div>
+        </div>
+        <div id="essence-detail-view" style="display:none">
+            <div class="ed-sticky-bar" id="ed-sticky-bar">
+                <button class="essence-back-btn" onclick="showEssenceList()">← 返回</button>
+            </div>
+            <div class="ed-scroll-body">
+                <div id="essence-detail"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 设置页 ========== -->
+    <div class="page" id="page-settings">
+        <div class="settings-container">
+
+            <!-- 账号 -->
+            <div class="settings-card" id="sc-account">
+                <div class="sc-header" onclick="toggleSettingsCard('sc-account')">
+                    <span class="sc-title">👤 账号 <span class="sc-badge" id="sc-account-badge">未登录</span></span>
+                    <span class="sc-arrow" id="sc-account-arrow">▶</span>
+                </div>
+                <div class="sc-body" id="sc-account-body" style="display:none">
+                    <div id="login-container"></div>
+                </div>
+            </div>
+
+            <!-- AI 引擎 -->
+            <div class="settings-card" id="sc-ai">
+                <div class="sc-header" onclick="toggleSettingsCard('sc-ai')">
+                    <span class="sc-title">🤖 AI 源义释义引擎</span>
+                    <span class="sc-arrow" id="sc-ai-arrow">▶</span>
+                </div>
+                <div class="sc-body" id="sc-ai-body" style="display:none">
+                    <p class="settings-desc">配置 AI 接口后，搜索任意单词即可自动生成<span class="hl">源义释义</span>。推荐使用
+                        <strong>DeepSeek</strong>（国内可访问，注册送额度）。
+                    </p>
+                    <div class="settings-field">
+                        <label class="settings-label">API 提供商</label>
+                        <select id="ai-provider" class="settings-select" onchange="onProviderChange()">
+                            <option value="deepseek">DeepSeek（推荐）</option>
+                            <option value="custom">自定义 OpenAI 兼容接口</option>
+                        </select>
+                    </div>
+                    <div class="settings-field">
+                        <label class="settings-label">API Key</label>
+                        <input type="password" id="ai-apikey" class="settings-input" placeholder="sk-xxxxxxxxxxxxxxxx">
+                        <span class="settings-hint">获取 Key：<a href="https://platform.deepseek.com/api_keys"
+                                target="_blank">DeepSeek 控制台</a></span>
+                    </div>
+                    <div class="settings-field" id="field-endpoint" style="display:none">
+                        <label class="settings-label">API 端点</label>
+                        <input type="text" id="ai-endpoint" class="settings-input"
+                            placeholder="https://api.deepseek.com/v1/chat/completions">
+                    </div>
+                    <div class="settings-field" id="field-model" style="display:none">
+                        <label class="settings-label">模型名称</label>
+                        <input type="text" id="ai-model" class="settings-input" placeholder="deepseek-chat">
+                    </div>
+                    <div class="settings-actions">
+                        <button class="settings-btn primary" onclick="saveSettings()">💾 保存配置</button>
+                        <button class="settings-btn" onclick="testAIConnection()">🔌 测试连接</button>
+                    </div>
+                    <div id="settings-status" class="settings-status" style="display:none"></div>
+                </div>
+            </div>
+
+            <!-- 词库选择 -->
+            <div class="settings-card" id="sc-libs">
+                <div class="sc-header" onclick="toggleSettingsCard('sc-libs')">
+                    <span class="sc-title">📚 词库选择</span>
+                    <span class="sc-arrow" id="sc-libs-arrow">▶</span>
+                </div>
+                <div class="sc-body" id="sc-libs-body" style="display:none">
+                    <p class="settings-desc">选择要学习的词库，未勾选则不加载。留空 = 全部启用。</p>
+                    <div class="lib-grid" id="lib-grid"></div>
+                    <div class="settings-actions" style="margin-top:12px">
+                        <button class="settings-btn primary" onclick="saveLibrarySelection()">💾 保存词库</button>
+                        <span class="settings-muted" id="lib-status"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 缓存管理 -->
+            <div class="settings-card" id="sc-cache">
+                <div class="sc-header" onclick="toggleSettingsCard('sc-cache')">
+                    <span class="sc-title">📊 缓存管理</span>
+                    <span class="sc-arrow" id="sc-cache-arrow">▶</span>
+                </div>
+                <div class="sc-body" id="sc-cache-body" style="display:none">
+                    <p class="settings-desc">AI 生成结果会自动缓存到本地，下次查询无需再次调用 API。</p>
+                    <div class="settings-actions">
+                        <button class="settings-btn" onclick="clearAICache()">🗑️ 清空 AI 缓存</button>
+                        <span class="settings-muted" id="cache-count">加载中…</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 批量导入 -->
+            <div class="settings-card" id="sc-import">
+                <div class="sc-header" onclick="toggleSettingsCard('sc-import')">
+                    <span class="sc-title">📥 批量导入</span>
+                    <span class="sc-arrow" id="sc-import-arrow">▶</span>
+                </div>
+                <div class="sc-body" id="sc-import-body" style="display:none">
+                    <p class="settings-desc">粘贴任意英文文章、段落或句子，自动提取其中所有单词并导入词库。<br>已存在的词会自动跳过，未收录的词通过在线词典获取释义。</p>
+                    <textarea id="import-textarea" class="import-textarea" placeholder="在此粘贴英文文本...
+                    例如：一篇 CNN 新闻、一段英文小说、一页课本内容..." rows="5"></textarea>
+                    <div class="settings-actions" style="margin-top:10px">
+                        <button class="settings-btn primary" onclick="extractAndImport()">🔍 提取并导入</button>
+                        <button class="settings-btn"
+                            onclick="document.getElementById('import-textarea').value='';document.getElementById('import-result').style.display='none'">🗑️
+                            清空</button>
+                    </div>
+                    <div class="import-result" id="import-result" style="display:none">
+                        <div class="import-progress" id="import-progress"></div>
+                        <div class="import-summary" id="import-summary"></div>
+                    </div>
+                    <div class="settings-hint" style="margin-top:10px">💡 提示：系统会自动过滤 the/a/is 等常见虚词，只保留实义词。</div>
+                </div>
+            </div>
+
+            <!-- 关于 -->
+            <div class="settings-card" id="sc-about">
+                <div class="sc-header" onclick="toggleSettingsCard('sc-about')">
+                    <span class="sc-title">🌉 关于源来如此</span>
+                    <span class="sc-arrow" id="sc-about-arrow">▶</span>
+                </div>
+                <div class="sc-body" id="sc-about-body" style="display:none">
+                    <p class="settings-desc">源来如此 — 一以贯之，通则全通。更适合中国懒人宝宝的理解记忆单词方式。</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ========== PWA 安装提示 ========== -->
+    <div id="pwa-install-banner" style="display:none">
+        <div class="pwa-install-content">
+            <span class="pwa-install-icon">📲</span>
+            <div class="pwa-install-text">
+                <strong>添加到主屏幕</strong>
+                <span>像原生 App 一样使用</span>
+            </div>
+            <button id="pwa-install-btn" onclick="installPWA()">安装</button>
+            <button class="pwa-install-close" onclick="dismissPWAInstall()">✕</button>
+        </div>
+    </div>
+
+    <!-- ========== JS ========== -->
+    <script src="./js/words.js?v=12"></script>
+    <script src="./js/words_loader.js?v=2"></script>
+    <script src="./js/phrases.js?v=1"></script>
+    <script src="./js/essence.js?v=11"></script>
+    <script src="./js/ai.js?v=11"></script>
+    <script src="./js/api.js?v=11"></script>
+    <script src="./js/tree.js?v=15"></script>
+    <script src="./js/storage.js?v=15"></script>
+    <script src="./js/srs.js?v=15"></script>
+    <script src="./js/auth.js?v=1"></script>
+    <script src="./js/cloud.js?v=1"></script>
+    <script src="./js/app.js?v=15"></script>
+
+    <!-- ========== PWA 安装 & Service Worker ========== -->
+    <script>
+    (function() {
+        var deferredPrompt;
+        var installBtn = document.getElementById('pwa-install-btn');
+        var banner = document.getElementById('pwa-install-banner');
+
+        // 监听 beforeinstallprompt
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            // 已经安装过就不再显示
+            if (window.matchMedia('(display-mode: standalone)').matches) return;
+            var dismissed = sessionStorage.getItem('pwa_install_dismissed');
+            if (!dismissed) banner.style.display = 'block';
+        });
+
+        // 已安装后隐藏
+        window.addEventListener('appinstalled', function() {
+            banner.style.display = 'none';
+            deferredPrompt = null;
+            console.log('PWA 已安装');
+        });
+
+        // 安装点击
+        window.installPWA = function() {
+            if (!deferredPrompt) {
+                // iOS / 不支持 beforeinstallprompt 的浏览器：显示引导
+                alert('请使用浏览器菜单中的「添加到主屏幕」功能安装\n\n' +
+                      'Safari: 点击底部分享按钮 → 添加到主屏幕\n' +
+                      'Chrome: 点击右上角 ⋮ → 添加到主屏幕');
+                return;
+            }
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(result) {
+                if (result.outcome === 'accepted') {
+                    console.log('用户接受安装');
+                }
+                deferredPrompt = null;
+                banner.style.display = 'none';
+            });
+        };
+
+        window.dismissPWAInstall = function() {
+            banner.style.display = 'none';
+            sessionStorage.setItem('pwa_install_dismissed', '1');
+        };
+
+        // 注册 Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('./sw.js?_=3').then(function(reg) {
+                    console.log('[SW] 注册成功:', reg.scope);
+                }).catch(function(err) {
+                    console.log('[SW] 注册失败:', err);
+                });
+            });
+        }
+    })();
+    </script>
+</body>
+
+</html>

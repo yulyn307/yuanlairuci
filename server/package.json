@@ -1,0 +1,15 @@
+{
+    "name": "yuanlairuci-server",
+    "version": "1.0.0",
+    "description": "源来如此 - 腾讯云短信验证 + 用户数据同步后端",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "node --watch index.js"
+    },
+    "dependencies": {
+        "express": "^4.21.0",
+        "tencentcloud-sdk-nodejs-sms": "^4.0.900",
+        "uuid": "^10.0.0"
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "name": "yuanlairuci",
+    "version": "2.0.0",
+    "description": "源来如此 — 词源解析 + 间隔记忆 + AI 释义 PWA",
+    "main": "server/index.js",
+    "scripts": {
+        "start": "node server/index.js",
+        "dev": "node --watch server/index.js"
+    },
+    "dependencies": {
+        "express": "^4.21.0",
+        "tencentcloud-sdk-nodejs-sms": "^4.0.900"
+    }
+}
