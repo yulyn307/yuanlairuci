@@ -14,6 +14,18 @@ const DEFAULT_SERVER_URL = (function () {
     return 'http://localhost:3456';
 })();
 
+// 如果 Netlify 部署（前端在 netlify，后端在 ngrok），尝试使用 ngrok 地址
+var _injectedServerUrl = null;
+try {
+    // 存储在 localStorage 中的服务端地址优先
+    var saved = localStorage.getItem(AUTH_SERVER_KEY);
+    if (!saved && window.location.hostname && window.location.hostname.includes('netlify.app')) {
+        // Netlify 部署自动指向 ngrok（本地电脑需要保持 ngrok 运行）
+        _injectedServerUrl = 'https://cupping-taco-copartner.ngrok-free.dev';
+        localStorage.setItem(AUTH_SERVER_KEY, _injectedServerUrl);
+    }
+} catch(e) {}
+
 function getServerUrl() {
     var saved = localStorage.getItem(AUTH_SERVER_KEY);
     return saved || DEFAULT_SERVER_URL;
