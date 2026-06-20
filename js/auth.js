@@ -56,9 +56,32 @@ function clearAuth() {
     localStorage.removeItem(AUTH_USER_KEY);
     localStorage.removeItem(AUTH_TOKEN_KEY);
     localStorage.removeItem('yinyu_cloud_synced');
+    localStorage.removeItem('yinyu_offline_mode');
 }
 
-function isLoggedIn() { return !!getToken() && !!getCurrentUser(); }
+function isLoggedIn() {
+    // 离线模式也算已登录
+    if (localStorage.getItem('yinyu_offline_mode') === 'on') return true;
+    return !!getToken() && !!getCurrentUser();
+}
+
+function isOfflineMode() {
+    return localStorage.getItem('yinyu_offline_mode') === 'on';
+}
+
+function enableOfflineMode() {
+    localStorage.setItem('yinyu_offline_mode', 'on');
+    // 创建一个本地伪用户
+    var offlineUser = {
+        phone: '离线用户',
+        token: 'offline-token-' + Date.now(),
+        createdAt: new Date().toISOString(),
+        isOffline: true
+    };
+    saveCurrentUser(offlineUser);
+    localStorage.setItem(AUTH_TOKEN_KEY, offlineUser.token);
+    localStorage.setItem('yinyu_cloud_synced', '离线模式（无需服务器）');
+}
 
 // ==================== API 请求 ====================
 function apiPost(path, body, callback) {
@@ -162,23 +185,29 @@ function renderLoginPage() {
     var token = getToken();
 
     if (user && token) {
+        var offline = isOfflineMode() || (user.isOffline);
         var masked = user.phone || '';
-        if (masked.length > 7) masked = masked.substring(0, 3) + '****' + masked.substring(masked.length - 4);
+        if (!offline && masked.length > 7) masked = masked.substring(0, 3) + '****' + masked.substring(masked.length - 4);
+        if (offline) masked = '📱 离线用户';
         var svr = getServerUrl();
-        ct.innerHTML =
-            '<div class="login-form-wrap">' +
-            '<div class="login-logged-row">' +
-            '<div class="login-avatar">👤</div>' +
-            '<div class="login-user-info">' +
-            '<span class="login-user-phone">' + masked + '</span>' +
-            '<div class="login-stats" id="login-stats">📊 加载中...</div>' +
-            '</div>' +
-            '</div>' +
-            '<div class="login-btn-row">' +
+        var offlineBadge = offline ? '<span class="login-offline-badge">离线</span>' : '';
+        var syncRow = offline
+            ? '<div class="login-offline-hint" style="margin-top:8px">💡 离线模式下所有数据存放在手机本地，学习、查词、AI释义全部可用。可随时切换到在线模式进行云端同步。</div>'
+            : ('<div class="login-btn-row">' +
             '<button class="login-btn login-btn-outline" onclick="handleLogout()">退出登录</button>' +
             '<button class="login-btn login-btn-sync" onclick="handleManualSync()">☁️ 手动同步</button>' +
             '</div>' +
-            '<div class="login-server-info">☁️ 服务器：<span class="lsv-url">' + svr + '</span> <a href="javascript:void(0)" onclick="handleChangeServer()" style="font-size:11px;color:var(--primary);margin-left:4px">更改</a></div>' +
+            '<div class="login-server-info">☁️ 服务器：<span class="lsv-url">' + svr + '</span> <a href="javascript:void(0)" onclick="handleChangeServer()" style="font-size:11px;color:var(--primary);margin-left:4px">更改</a></div>');
+        ct.innerHTML =
+            '<div class="login-form-wrap">' +
+            '<div class="login-logged-row">' +
+            '<div class="login-avatar">' + (offline ? '📱' : '👤') + '</div>' +
+            '<div class="login-user-info">' +
+            '<span class="login-user-phone">' + masked + offlineBadge + '</span>' +
+            '<div class="login-stats" id="login-stats">📊 加载中...</div>' +
+            '</div>' +
+            '</div>' +
+            syncRow +
             '<div class="login-status" id="login-status"></div>' +
             '</div>';
         updateLoginStats();
@@ -201,6 +230,9 @@ function renderLoginPage() {
             '</div>' +
             '<button class="login-btn login-btn-submit" onclick="handleLogin()">登 录</button>' +
             '<div class="login-error" id="login-error" style="display:none"></div>' +
+            '<div class="login-offline-divider"><span>或</span></div>' +
+            '<button class="login-btn login-btn-offline" onclick="handleOfflineLogin()" style="background:var(--bg-light);color:var(--text);border:1px solid var(--bg-light)">📱 离线模式（无需服务器）</button>' +
+            '<div class="login-offline-hint">💡 离线模式：所有数据保存在本地手机，无需联网或服务器。学习、查词、AI释义全部可用。</div>' +
             '<div class="login-server-toggle" onclick="var e=document.getElementById(\'login-server-extra\');e.style.display=e.style.display===\'none\'?\'block\':\'none\'">⚙️ 服务器：<span class="lsv-url">' + svr + '</span> <span style="font-size:10px;opacity:0.6">（点击修改）</span></div>' +
             '<div class="login-server-extra" id="login-server-extra" style="display:none">' +
             '<div class="login-field">' +
@@ -212,7 +244,6 @@ function renderLoginPage() {
             '</div>' +
             '<div class="login-error" id="login-server-msg" style="display:none;margin-top:4px;font-size:12px"></div>' +
             '</div>' +
-            '<div class="login-offline-hint">💡 无需登录也可使用 — 所有学习功能均支持离线使用，数据保存在浏览器中。登录仅用于多设备同步和云端备份。</div>' +
             '</div>';
         // 自动检测服务器连接状态
         checkServerStatus();
@@ -286,6 +317,15 @@ function handleLogout() {
         signOut(); renderLoginPage(); showLoginStatus('');
         if (typeof updateAccountBadge === 'function') updateAccountBadge();
     }
+}
+
+function handleOfflineLogin() {
+    enableOfflineMode();
+    renderLoginPage();
+    showLoginStatus('✅ 已进入离线模式 — 所有数据保存在本地');
+    if (typeof updateAccountBadge === 'function') updateAccountBadge();
+    // 刷新学习卡片
+    if (typeof loadWords === 'function') loadWords();
 }
 
 function handleManualSync() {
